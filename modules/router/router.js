@@ -18,16 +18,24 @@ let fileuploader = require("../fileupload/fileuploader");
 let uploader = fileuploader.any();
 
 module.exports = function(app){
-   // log every url api path
+   // 紀錄每個url path
    app.use('/',(req,res,next)=>{
       info.info(req.path);
       consoleLog.info(req.path);
       warn.warn(req.path);
       next();
    });
-   
+   // 首頁功能列表
    app.get('/', (req, res)=>{   
-     res.status(200).json({"msg":"default page"});
+     res.status(200).json(
+                          {"msg":"default page",
+                           "utils":[
+                             {"type":"post","url":"/files","name":"uploadfile",
+                              "params":[{"type":"queryString","keys":["i","p","s","ca","b","m"]},{"type":"files"}]},
+                             {"type":"post","url":"/targets","name":"getCheckBoxs","params":[{"type":"JSON","name":"IMEI"}]},
+                             {"type":"get","url":"/targets","name":"getCurrentTargets"}
+                            ]
+                          });
    });
 
    // files
@@ -35,7 +43,6 @@ module.exports = function(app){
      uploader(req, res, function(err){
         if(err){
           consoleLog.info(err);
-          // res.status(200).json({"err":err});
         }
         consoleLog.info('files upload');
         warn.warn('files upload');
@@ -197,7 +204,7 @@ module.exports = function(app){
       res.status(200).json({"msg":"no IMEI input"});
     }
    });
-
+   //如果使用其他 key回應404
    app.get('/*', (req,res)=>{
      res.status(404).json({msg:'not such path'});
    });

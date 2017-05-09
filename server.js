@@ -10,7 +10,7 @@ let error = logger('error');
 let consoleLog = logger('console');
 let info = logger('info');
 let router = require('./modules/router/router');
-
+// 加入能夠接受json input
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
