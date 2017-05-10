@@ -7,7 +7,7 @@ let path = require('path');
 let log4js = require('./modules/logger/log4js');
 let {logger} = log4js;
 let error = logger('error');
-let consoleLog = logger('console');
+// let consoleLog = logger('console');
 let info = logger('info');
 let router = require('./modules/router/router');
 // 加入能夠接受json input
@@ -21,7 +21,7 @@ app.listen(process.env.PORT || 8080);
 
 app.on('error',(e)=>{
   error.error(e);
-  consoleLog.error(e);
+//   consoleLog.error(e);
 });
 // 防止立即 停止
 process.stdin.resume();//so the program will not close instantly
@@ -30,18 +30,18 @@ function exitHandler(options, err) {
     if (options.cleanup){
         // app about to close
         info.warn('server close');
-        consoleLog.info('server about to close');
+        // consoleLog.info('server about to close');
     }
     if (err) {
         // error happen to close the app
         error.error(err.stack);
         // info.warn('server close');
-        consoleLog.info(err.stack);
+        // consoleLog.info(err.stack);
     }
     if (options.exit){
         // error.error('server close');
         info.warn('server close');
-        consoleLog.info('server close');
+        // consoleLog.info('server close');
         // close the app
         process.exit();
     }
