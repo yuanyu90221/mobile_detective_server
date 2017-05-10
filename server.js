@@ -25,7 +25,12 @@ app.on('error',(e)=>{
 });
 // 防止立即 停止
 process.stdin.resume();//so the program will not close instantly
-
+/**
+ * 處理exit event
+ * 
+ * @param {any} options 
+ * @param {any} err 
+ */
 function exitHandler(options, err) {
     if (options.cleanup){
         // app about to close

