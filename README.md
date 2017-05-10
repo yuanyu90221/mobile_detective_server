@@ -21,8 +21,15 @@ mobile_detective_server
 +   package.json: 紀錄project相關設定檔(1.lib dependency,2. npm script, 3. project的git ref)
 +   README.md: 註解檔案
 +   server.js: server主要邏輯
++   startup.bat: 開啟server script
++   stop.bat: 關閉server script
 #   2.使用方式
 +   安裝lib指令:`npm install`
 +   執行server指令:`npm run start`
 #   3.執行測試 
 +   `npm run test`
+#   4.用bat 執行
++       1.開啟 server
++           `startup.bat`
++       2.關閉 server
++           `stop.bat`
